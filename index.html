@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSG 특가 상품 인사이트 대시보드</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF3F3F;
+            --secondary: #2D3436;
+            --accent: #00CEC9;
+            --bg: #0F172A;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #F8FAFC;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #1E293B 0%, #0F172A 100%);
+        }
+
+        .glow-circle {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 63, 63, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: move 20s infinite alternate;
+        }
+
+        @keyframes move {
+            0% { transform: translate(-10%, -10%); }
+            100% { transform: translate(20%, 20%); }
+        }
+
+        header {
+            padding: 4rem 2rem;
+            text-align: center;
+            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.8), transparent);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #FF3F3F, #FF8E8E);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #94A3B8;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: #94A3B8;
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .stat-card .trend {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .trend.up { color: #10B981; }
+
+        /* Main Content */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-layout { grid-template-columns: 1fr; }
+        }
+
+        .chart-box {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .chart-box h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-box h2::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .chart-img {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            transition: filter 0.3s ease;
+            cursor: zoom-in;
+        }
+
+        .chart-img:hover {
+            filter: brightness(1.1);
+        }
+
+        .description {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: var(--glass);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            color: #CBD5E1;
+        }
+
+        /* Keyword Badge */
+        .badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+
+        .badge {
+            background: var(--glass);
+            padding: 8px 16px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .badge:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        footer {
+            text-align: center;
+            padding: 4rem;
+            color: #64748B;
+            border-top: 1px solid var(--border);
+            margin-top: 4rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow">
+        <div class="glow-circle" style="top: 10%; left: 10%;"></div>
+        <div class="glow-circle" style="bottom: 10%; right: 10%; background: radial-gradient(circle, rgba(0, 206, 201, 0.1) 0%, transparent 70%);"></div>
+    </div>
+
+    <header>
+        <h1>SSG Insight Dashboard</h1>
+        <p class="subtitle">실시간 수집된 특가 상품 380건을 바탕으로 정교하게 분석된 비즈니스 대시보드입니다. 마켓 트렌드와 가격 전략을 한눈에 확인하세요.</p>
+    </header>
+
+    <div class="container">
+        <!-- Stats Row -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Products</h3>
+                <div class="value">380</div>
+                <div class="trend up">▲ 전수 조사 완료</div>
+            </div>
+            <div class="stat-card">
+                <h3>Avg. Price</h3>
+                <div class="value">₩127,217</div>
+                <div class="trend">중앙값: ₩34,760</div>
+            </div>
+            <div class="stat-card">
+                <h3>Top Category Brand</h3>
+                <div class="value">Amore</div>
+                <div class="trend">9 Items Active</div>
+            </div>
+            <div class="stat-card">
+                <h3>Direct Delivery Rate</h3>
+                <div class="value">57.1%</div>
+                <div class="trend up">S.COM 전용 물량</div>
+            </div>
+        </div>
+
+        <!-- Main Charts Section -->
+        <div class="dashboard-layout">
+            <!-- Left Column -->
+            <div class="col">
+                <div class="chart-box">
+                    <h2>가격 분포 분석</h2>
+                    <img src="images/01_price_dist.png" class="chart-img" alt="Price Distribution">
+                    <div class="description">
+                        대부분의 상품이 5만 원 이하의 강력한 가성비 구간에 집중되어 있으며, 소수의 프리미엄 가전 상품이 롱테일을 형성하고 있습니다.
+                    </div>
+                </div>
+
+                <div class="chart-box">
+                    <h2>브랜드 점유율 Top 10</h2>
+                    <img src="images/02_brand_freq.png" class="chart-img" alt="Brand Frequency">
+                    <div class="description">
+                        아모레퍼시픽, 삼성 등 신뢰도 높은 전통적 강자 브랜드들이 특가 구좌의 핵심을 차지하여 트래픽 유입을 견인합니다.
+                    </div>
+                </div>
+
+                <div class="chart-box">
+                    <h2>핵심 키워드 분석 (TF-IDF)</h2>
+                    <img src="images/11_tfidf_keywords.png" class="chart-img" alt="Keywords">
+                    <div class="badge-container">
+                        <span class="badge">#특가</span>
+                        <span class="badge">#단독</span>
+                        <span class="badge">#Best</span>
+                        <span class="badge">#New</span>
+                        <span class="badge">#봄맞이</span>
+                    </div>
+                    <div class="description">
+                        상품명에서 추출된 핵심 키워드들은 '희소성'과 '최신성'을 강조하여 고객의 클릭을 유도하는 마케팅 언어로 구성되어 있습니다.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col">
+                <div class="chart-box">
+                    <h2>판매처별 점유율</h2>
+                    <img src="images/03_salestr_share.png" class="chart-img" alt="Sales Store Share">
+                    <div class="description">
+                        신세계 통합 온라인몰(S.COM)이 과반을 차지하며 플랫폼 주도의 특가 행사가 활발히 진행 중입니다.
+                    </div>
+                </div>
+
+                <div class="chart-box">
+                    <h2>가격대별 구간 분포</h2>
+                    <img src="images/10_price_range_dist.png" class="chart-img" alt="Price Range">
+                    <div class="description">
+                        1~3만 원대 상품이 가장 두터운 층을 형성하며, 소비자의 구매 결정력이 가장 높은 '스윗 스팟'임을 증명합니다.
+                    </div>
+                </div>
+
+                <div class="chart-box">
+                    <h2>브랜드 x 판매처 Heatmap</h2>
+                    <img src="images/09_brand_salestr_heatmap.png" class="chart-img" alt="Heatmap">
+                    <div class="description">
+                        특정 대형 브랜드와 특정 물류 거점 간의 전략적 연결 고리를 시각화합니다. 카테고리 MD들의 배분 로직이 투영되어 있습니다.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 SSG Data Insights Team. All rights reserved.</p>
+        <p style="margin-top: 10px; font-size: 0.8rem;">분석 전문가 루카스 | 데이터 추출 시점: 2026-04-20</p>
+    </footer>
+
+    <script>
+        // Smooth scroll or simple interactions if needed
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.addEventListener('click', () => {
+                card.style.transform = 'scale(0.98)';
+                setTimeout(() => card.style.transform = '', 100);
+            });
+        });
+    </script>
+</body>
+</html>
